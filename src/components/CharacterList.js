@@ -3,32 +3,44 @@ import WelcomePage from "./WelcomePage";
 import CharacterCard from "./CharacterCard";
 import axios from "axios";
 
-function CharacterList() {
-  // TODO: Add useState to track data from useEffect
+function CharacterList(props) {
   const [data, setData] = useState([]);
+  const [query, setQuery] = useState("");
+
   useEffect(() => {
-    // TODO: Add API Request here - must run in `useEffect`
-    //  Important: verify the 2nd `useEffect` parameter: the dependancies array!
     axios
       .get(
         "https://cors-anywhere.herokuapp.com/https://rickandmortyapi.com/api/character/"
       )
       .then(response => {
-        console.log(response.data);
-        setData(response.data);
+        const characters = response.data.results.filter(character =>
+          character.name.toLowerCase().includes(query.toLowerCase())
+        );
+        console.log(response.data.results);
+        setData(characters);
       })
       .catch(error => {
         console.log("error", error);
       });
-  }, []);
+  }, [query]);
+
+  const handleInputChange = event => {
+    setQuery(event.target.value);
+  };
 
   return (
     <section className="character-list">
-      <h2>
-        {data.map((p, index) => (
-          <CharacterCard key={index} name={p.name} />
-        ))}
-      </h2>
+      <form className="search">
+        <input type="text" onChange={handleInputChange} value={query} />
+      </form>
+      {data.map((data, index) => (
+        <CharacterCard
+          key={index}
+          image={data.image}
+          name={data.name}
+          species={data.species}
+        />
+      ))}
     </section>
   );
 }
